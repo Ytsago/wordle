@@ -1,9 +1,10 @@
 #include "SDL3/SDL_events.h"
 #include "SDL3/SDL_init.h"
+#include "SDL3/SDL_keyboard.h"
+#include "SDL3/SDL_keycode.h"
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_version.h"
 #include "SDL3/SDL_video.h"
-#include <SDL3/SDL.h>
 #include <stdio.h>
 
 int main(int argc, char **argv) {
@@ -32,6 +33,14 @@ int main(int argc, char **argv) {
     return (1);
   }
 
+  if (!SDL_StartTextInput(window)) {
+    dprintf(2, "Failed to start SDL Text Input: %s\n", SDL_GetError());
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+    return (1);
+  }
+
   SDL_Event event;
   int running = 1;
   while (running) {
@@ -40,6 +49,14 @@ int main(int argc, char **argv) {
       case SDL_EVENT_QUIT:
         running = 0;
         break;
+      case SDL_EVENT_TEXT_INPUT:
+        printf("%s", event.text.text);
+        fflush(stdout);
+        break;
+      case SDL_EVENT_KEY_DOWN:
+        if (event.key.key == SDLK_RETURN)
+          printf("\n");
+        break;
       }
     }
     SDL_SetRenderDrawColor(renderer, 100, 149, 237, 255);
@@ -47,6 +64,7 @@ int main(int argc, char **argv) {
     SDL_RenderPresent(renderer);
   }
 
+  SDL_StopTextInput(window);
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
