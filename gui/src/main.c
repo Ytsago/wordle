@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
         break;
       }
     }
-    SDL_SetRenderDrawColor(renderer, 100, 149, 237, 255);
+    SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
     SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
