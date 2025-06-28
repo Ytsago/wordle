@@ -60,6 +60,13 @@ int main(int argc, char **argv) {
     SDL_Quit();
     return (1);
   }
+  if (!SDL_SetRenderVSync(renderer, SDL_RENDERER_VSYNC_ADAPTIVE)) {
+    dprintf(2, "Failed to enable VSync: %s\n", SDL_GetError());
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+    return (1);
+  }
 
   SDL_Texture *charsTex = load_bmp_texture(renderer, "res/chars.bmp");
   if (charsTex == NULL) {
