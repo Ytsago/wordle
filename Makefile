@@ -51,7 +51,6 @@ fclean: clean
 re: fclean
 	make all
 
-
 debug: $(OBJS) $(LIBFT)
 	$(CC) $(DEBUGFLAGS) -o $@ $^
 
