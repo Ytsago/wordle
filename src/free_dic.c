@@ -19,7 +19,6 @@ void	free_dic(t_vector *word_list)
 	char	*line;
 
 	i = 0;
-	dprintf(2, "%zu\n", word_list->num_elements);
 	while (i < word_list->num_elements)
 	{
 		line = *(char **)(get_vector_value(word_list, i));
