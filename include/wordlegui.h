@@ -3,12 +3,15 @@
 
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_video.h"
+#include "SDL3_ttf/SDL_ttf.h"
 #include "libft.h"
 
 typedef struct SDLContext {
   SDL_Window *window;
   SDL_Renderer *renderer;
   SDL_Texture *charsTex;
+  SDL_Texture *textStatus;
+  TTF_Font *font;
   int loopRunning;
 } SDLContext;
 

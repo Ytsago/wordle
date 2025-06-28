@@ -9,7 +9,12 @@ FetchContent_Declare(
 	GIT_REPOSITORY "https://github.com/libsdl-org/SDL"
 	GIT_TAG        c9a6709bd21750f1ad9597be21abace78c6378c9  # release-3.2.16
 )
-FetchContent_MakeAvailable(SDL3)
+FetchContent_Declare(
+	SDL3_ttf
+	GIT_REPOSITORY "https://github.com/libsdl-org/SDL_ttf"
+	GIT_TAG        a1ce3670aec736ecbf0936c43f2f0cc53aa61e5b  # release-3.2.2
+)
+FetchContent_MakeAvailable(SDL3 SDL3_ttf)
 
 # HACK: Very dirty integration of external project using Makefile
 add_custom_target(build_backend
@@ -36,4 +41,4 @@ include_directories(include)
 
 add_executable(wordlegui src/main.c src/logic.c src/render.c)
 add_dependencies(wordlegui copy_resources)
-target_link_libraries(wordlegui PRIVATE SDL3::SDL3 wordlebackend)
+target_link_libraries(wordlegui PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf wordlebackend)

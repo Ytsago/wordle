@@ -60,5 +60,15 @@ void render_wordle(Gui *gui) {
       }
     }
   }
+  if (gui->sdl.textStatus) {
+    SDL_FRect dst = {
+        .x = start_x,
+        .y = start_y + offset_y * 7.f + 64.f * 6.f,
+        .w = gui->sdl.textStatus->w,
+        .h = gui->sdl.textStatus->h,
+    };
+    SDL_SetRenderDrawColor(gui->sdl.renderer, 255, 255, 255, 255);
+    SDL_RenderTexture(gui->sdl.renderer, gui->sdl.textStatus, NULL, &dst);
+  }
   SDL_RenderPresent(gui->sdl.renderer);
 }

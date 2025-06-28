@@ -4,6 +4,7 @@
 #include "SDL3/SDL_surface.h"
 #include "SDL3/SDL_version.h"
 #include "SDL3/SDL_video.h"
+#include "SDL3_ttf/SDL_ttf.h"
 #include "wordle.h"
 #include "wordlegui.h"
 #include <stdio.h>
@@ -51,9 +52,16 @@ int main(int argc, char **argv) {
     free_dic(&wordList);
     return (1);
   }
+  if (!TTF_Init()) {
+    dprintf(2, "Failed to initialize SDL ttf: %s\n", SDL_GetError());
+    SDL_Quit();
+    free_dic(&wordList);
+    return (1);
+  }
   SDL_Window *window = SDL_CreateWindow("wordle gui", 1280, 720, 0);
   if (window == NULL) {
     dprintf(2, "Failed to create SDL window: %s\n", SDL_GetError());
+    TTF_Quit();
     SDL_Quit();
     free_dic(&wordList);
     return (1);
@@ -76,6 +84,7 @@ int main(int argc, char **argv) {
   if (renderer == NULL) {
     dprintf(2, "Failed to create SDL renderer: %s\n", SDL_GetError());
     SDL_DestroyWindow(window);
+    TTF_Quit();
     SDL_Quit();
     free_dic(&wordList);
     return (1);
@@ -84,6 +93,7 @@ int main(int argc, char **argv) {
     dprintf(2, "Failed to enable VSync: %s\n", SDL_GetError());
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    TTF_Quit();
     SDL_Quit();
     free_dic(&wordList);
     return (1);
@@ -94,6 +104,19 @@ int main(int argc, char **argv) {
     dprintf(2, "Failed to load chars bitmap: %s\n", SDL_GetError());
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    TTF_Quit();
+    SDL_Quit();
+    free_dic(&wordList);
+    return (1);
+  }
+
+  TTF_Font *font = TTF_OpenFont("res/Ubuntu-Regular.ttf", 24);
+  if (font == NULL) {
+    dprintf(2, "Failed to load ttf font: %s\n", SDL_GetError());
+    SDL_DestroyTexture(charsTex);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    TTF_Quit();
     SDL_Quit();
     free_dic(&wordList);
     return (1);
@@ -101,25 +124,49 @@ int main(int argc, char **argv) {
 
   if (!SDL_StartTextInput(window)) {
     dprintf(2, "Failed to start SDL Text Input: %s\n", SDL_GetError());
+    TTF_CloseFont(font);
     SDL_DestroyTexture(charsTex);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    TTF_Quit();
+    SDL_Quit();
+    free_dic(&wordList);
+    return (1);
+  }
+
+  SDL_Texture *textTex = NULL;
+  SDL_Surface *textSurface = TTF_RenderText_Blended(
+      font, "Hello, world!", 0, (SDL_Color){255, 255, 255, 255});
+  if (textSurface) {
+    textTex = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_DestroySurface(textSurface);
+  }
+  if (textTex == NULL) {
+    dprintf(2, "Failed to start SDL Text Input: %s\n", SDL_GetError());
+    SDL_StopTextInput(window);
+    TTF_CloseFont(font);
+    SDL_DestroyTexture(charsTex);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    TTF_Quit();
     SDL_Quit();
     free_dic(&wordList);
     return (1);
   }
 
   char *word = get_random_word(&wordList);
-  printf("Word is: %s\n", word);
-  Gui gui = {{window, renderer, charsTex, 1}, {&wordList, word, {0}, 0}};
+  Gui gui = {{window, renderer, charsTex, textTex, font, 1},
+             {&wordList, word, {0}, 0}};
   while (gui.sdl.loopRunning) {
     wordle_logic(&gui);
     render_wordle(&gui);
   }
 
   SDL_StopTextInput(window);
+  TTF_CloseFont(font);
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
+  TTF_Quit();
   SDL_Quit();
   free_dic(&wordList);
   return (0);
