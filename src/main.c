@@ -15,13 +15,38 @@
 #include <time.h>
 #include "libft.h"
 #include "wordle.h"
+#include <SDL2/SDL.h>
 
 int	parse_file(t_vector *word_list, char *file);
+
+void	sdl_clean_exit(SDL_Window	**screen)
+{
+	SDL_DestroyWindow(*screen);
+	SDL_Quit();
+}
+
+bool	sdl_display(SDL_Window	**window)
+{
+	if (SDL_Init(SDL_INIT_VIDEO) != 0)
+	{
+		perror("Error\nSDL_init failed");
+		return (false);
+	}
+	*window = SDL_CreateWindow("Wordle", 0, 0, 1920, 1080, SDL_WINDOW_RESIZABLE);
+	if (!*window)
+	{
+		fprintf(stderr, "Error\nSDL_CreateWindow : %s", SDL_GetError());
+		SDL_Quit();
+		return (false);
+	}
+	return (true);
+}
 
 int	main(int argc, char **argv)
 {
 	t_vector	word_list;
 	int			return_val;
+	SDL_Window	*window = NULL;
 
 	srand(time(NULL));
 	if (argc != 2)
@@ -46,6 +71,8 @@ int	main(int argc, char **argv)
 		free_dic(&word_list);
 		return (3);
 	}
+	sdl_display(&window);
 	run_wordle(&word_list, get_random_word(&word_list));
 	free_dic(&word_list);
+	sdl_clean_exit(&window);
 }

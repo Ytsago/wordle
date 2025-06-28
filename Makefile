@@ -28,7 +28,7 @@ MAKEFLAGS = --no-print-directory
 all: $(NAME)
 
 $(NAME): $(OBJS) $(LIBFT)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CC) $(CFLAGS) -lSDL2 -o $@ $^ $(LDFLAGS)
 
 $(BONUS_NAME): $(BONUS_OBJS) $(LIBFT)
 	$(CC) $(CFLAGS) -o $@ $^
