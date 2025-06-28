@@ -11,5 +11,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SDL3)
 
+add_custom_target(copy_resources
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+		"${CMAKE_CURRENT_SOURCE_DIR}/res/"
+		"${CMAKE_CURRENT_BINARY_DIR}/res/"
+)
+
 add_executable(wordlegui src/main.c)
+add_dependencies(wordlegui copy_resources)
 target_link_libraries(wordlegui PRIVATE SDL3::SDL3)
