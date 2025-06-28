@@ -30,9 +30,8 @@ MAKEFLAGS = --no-print-directory
 all: $(NAME)
 
 $(NAME): $(OBJS) $(LIBFT)
-	$(AR) -x libft/libft.a
-	$(AR) $(ARFLAGS) -o $@ *.o $^ $(LDFLAGS)
-	rm *.o
+	cp libft/libft.a $(NAME)
+	$(AR) $(ARFLAGS) -o $@ $(OBJS) $(LDFLAGS)
 
 $(BONUS_NAME): $(BONUS_OBJS) $(LIBFT)
 	$(CC) $(CFLAGS) -o $@ $^
