@@ -17,6 +17,8 @@ add_custom_target(copy_resources
 		"${CMAKE_CURRENT_BINARY_DIR}/res/"
 )
 
-add_executable(wordlegui src/main.c)
+include_directories(include)
+
+add_executable(wordlegui src/main.c src/logic.c src/render.c)
 add_dependencies(wordlegui copy_resources)
 target_link_libraries(wordlegui PRIVATE SDL3::SDL3)

@@ -1,16 +1,11 @@
-#include "SDL3/SDL_events.h"
 #include "SDL3/SDL_init.h"
 #include "SDL3/SDL_keyboard.h"
-#include "SDL3/SDL_keycode.h"
-#include "SDL3/SDL_rect.h"
 #include "SDL3/SDL_render.h"
-#include "SDL3/SDL_stdinc.h"
 #include "SDL3/SDL_surface.h"
 #include "SDL3/SDL_version.h"
 #include "SDL3/SDL_video.h"
-#include <ctype.h>
+#include "wordlegui.h"
 #include <stdio.h>
-#include <string.h>
 
 static SDL_Texture *load_bmp_texture(SDL_Renderer *renderer, char *path) {
   SDL_Surface *surface = SDL_LoadBMP(path);
@@ -86,60 +81,10 @@ int main(int argc, char **argv) {
     return (1);
   }
 
-  char guesses[6][6] = {0};
-  int currentGuess = 0;
-
-  SDL_Event event;
-  int running = 1;
-  while (running) {
-    while (SDL_PollEvent(&event)) {
-      switch (event.type) {
-      case SDL_EVENT_QUIT:
-        running = 0;
-        break;
-      case SDL_EVENT_TEXT_INPUT:
-        if (currentGuess >= 6)
-          break;
-        char chars[2] = {0};
-        chars[0] = event.text.text[0];
-        if (!isalpha(chars[0]))
-          break;
-        chars[0] = toupper(chars[0]);
-        SDL_strlcat(guesses[currentGuess], chars, 6);
-        break;
-      case SDL_EVENT_KEY_DOWN:
-        if (currentGuess >= 6)
-          break;
-        if (event.key.key == SDLK_RETURN)
-          currentGuess++;
-        if (event.key.key == SDLK_BACKSPACE) {
-          int guessLen = strlen(guesses[currentGuess]);
-          if (guessLen > 0) {
-            guesses[currentGuess][guessLen - 1] = 0;
-          }
-        }
-        break;
-      }
-    }
-    SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
-    SDL_RenderClear(renderer);
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
-    for (int i = 0; i < 6; i++) {
-      char *guess = guesses[i];
-      if (!*guess)
-        break;
-      for (int j = 0; j < 5; j++) {
-        char c = guess[j];
-        if (!c)
-          break;
-        SDL_FRect src = {.x = (c - 'A') * 64.f, .y = 0.f, .h = 64.f, .w = 64.f};
-        SDL_FRect dst = {j * 64, i * 64, 64, 64};
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        SDL_RenderTexture(renderer, charsTex, &src, &dst);
-      }
-    }
-    SDL_RenderPresent(renderer);
+  Gui gui = {{window, renderer, charsTex, 1}, {0}};
+  while (gui.sdl.loopRunning) {
+    wordle_logic(&gui);
+    render_wordle(&gui);
   }
 
   SDL_StopTextInput(window);
