@@ -1,3 +1,4 @@
+#include "SDL3/SDL_error.h"
 #include "SDL3/SDL_init.h"
 #include "SDL3/SDL_keyboard.h"
 #include "SDL3/SDL_render.h"
@@ -20,6 +21,25 @@ static SDL_Texture *load_bmp_texture(SDL_Renderer *renderer, char *path) {
   return (texture);
 }
 
+static void free_gui(Gui *gui) {
+  if (gui->sdl.window && SDL_TextInputActive(gui->sdl.window))
+    SDL_StopTextInput(gui->sdl.window);
+  if (gui->sdl.font)
+    TTF_CloseFont(gui->sdl.font);
+  if (gui->sdl.charsTex)
+    SDL_DestroyTexture(gui->sdl.charsTex);
+  if (gui->sdl.renderer)
+    SDL_DestroyRenderer(gui->sdl.renderer);
+  if (gui->sdl.window)
+    SDL_DestroyWindow(gui->sdl.window);
+  if (gui->game.wordList)
+    free_dic(gui->game.wordList);
+  if (TTF_WasInit())
+    TTF_Quit();
+  if (SDL_WasInit(SDL_INIT_VIDEO))
+    SDL_Quit();
+}
+
 // TODO: better error handling, remove repetitions
 int main(int argc, char **argv) {
   (void)argc;
@@ -30,18 +50,22 @@ int main(int argc, char **argv) {
     dprintf(2, "Usage: %s <words.txt>\n", argv[0]);
     return (1);
   }
+
+  Gui gui = {0};
+
   t_vector wordList;
   switch (parse_file(&wordList, argv[1])) {
   case -1:
     dprintf(2, "Failed to load words: system error\n");
-    break;
+    return (1);
   case -2:
     dprintf(2, "Failed to load words: invalid file format\n");
-    break;
+    return (1);
   case -3:
     dprintf(2, "Failed to load words: not enough words\n");
-    break;
+    return (1);
   }
+  gui.game.wordList = &wordList;
 
   int sdl_version = SDL_GetVersion();
   printf("Using SDL v%d.%d.%d\n", SDL_VERSIONNUM_MAJOR(sdl_version),
@@ -49,21 +73,18 @@ int main(int argc, char **argv) {
 
   if (!SDL_Init(SDL_INIT_VIDEO)) {
     dprintf(2, "Failed to initialize SDL: %s\n", SDL_GetError());
-    free_dic(&wordList);
+    free_gui(&gui);
     return (1);
   }
   if (!TTF_Init()) {
     dprintf(2, "Failed to initialize SDL ttf: %s\n", SDL_GetError());
-    SDL_Quit();
-    free_dic(&wordList);
+    free_gui(&gui);
     return (1);
   }
-  SDL_Window *window = SDL_CreateWindow("wordle gui", 1280, 720, 0);
-  if (window == NULL) {
+  gui.sdl.window = SDL_CreateWindow("wordle gui", 1280, 720, 0);
+  if (gui.sdl.window == NULL) {
     dprintf(2, "Failed to create SDL window: %s\n", SDL_GetError());
-    TTF_Quit();
-    SDL_Quit();
-    free_dic(&wordList);
+    free_gui(&gui);
     return (1);
   }
 
@@ -80,94 +101,58 @@ int main(int argc, char **argv) {
   // }
   // printf("\nSelecting driver: %s\n", rendererName);
 
-  SDL_Renderer *renderer = SDL_CreateRenderer(window, rendererName);
-  if (renderer == NULL) {
+  gui.sdl.renderer = SDL_CreateRenderer(gui.sdl.window, rendererName);
+  if (gui.sdl.renderer == NULL) {
     dprintf(2, "Failed to create SDL renderer: %s\n", SDL_GetError());
-    SDL_DestroyWindow(window);
-    TTF_Quit();
-    SDL_Quit();
-    free_dic(&wordList);
+    free_gui(&gui);
     return (1);
   }
-  if (!SDL_SetRenderVSync(renderer, SDL_RENDERER_VSYNC_ADAPTIVE)) {
+  if (!SDL_SetRenderVSync(gui.sdl.renderer, SDL_RENDERER_VSYNC_ADAPTIVE)) {
     dprintf(2, "Failed to enable VSync: %s\n", SDL_GetError());
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    TTF_Quit();
-    SDL_Quit();
-    free_dic(&wordList);
+    free_gui(&gui);
     return (1);
   }
 
-  SDL_Texture *charsTex = load_bmp_texture(renderer, "res/chars.bmp");
-  if (charsTex == NULL) {
+  gui.sdl.charsTex = load_bmp_texture(gui.sdl.renderer, "res/chars.bmp");
+  if (gui.sdl.charsTex == NULL) {
     dprintf(2, "Failed to load chars bitmap: %s\n", SDL_GetError());
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    TTF_Quit();
-    SDL_Quit();
-    free_dic(&wordList);
+    free_gui(&gui);
     return (1);
   }
 
-  TTF_Font *font = TTF_OpenFont("res/Ubuntu-Regular.ttf", 24);
-  if (font == NULL) {
+  gui.sdl.font = TTF_OpenFont("res/Ubuntu-Regular.ttf", 24);
+  if (gui.sdl.font == NULL) {
     dprintf(2, "Failed to load ttf font: %s\n", SDL_GetError());
-    SDL_DestroyTexture(charsTex);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    TTF_Quit();
-    SDL_Quit();
-    free_dic(&wordList);
+    free_gui(&gui);
     return (1);
   }
 
-  if (!SDL_StartTextInput(window)) {
+  if (!SDL_StartTextInput(gui.sdl.window)) {
     dprintf(2, "Failed to start SDL Text Input: %s\n", SDL_GetError());
-    TTF_CloseFont(font);
-    SDL_DestroyTexture(charsTex);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    TTF_Quit();
-    SDL_Quit();
-    free_dic(&wordList);
+    free_gui(&gui);
     return (1);
   }
 
-  SDL_Texture *textTex = NULL;
   SDL_Surface *textSurface = TTF_RenderText_Blended(
-      font, "Hello, world!", 0, (SDL_Color){255, 255, 255, 255});
+      gui.sdl.font, "Hello, world!", 0, (SDL_Color){255, 255, 255, 255});
   if (textSurface) {
-    textTex = SDL_CreateTextureFromSurface(renderer, textSurface);
+    gui.sdl.textStatus =
+        SDL_CreateTextureFromSurface(gui.sdl.renderer, textSurface);
     SDL_DestroySurface(textSurface);
   }
-  if (textTex == NULL) {
+  if (gui.sdl.textStatus == NULL) {
     dprintf(2, "Failed to start SDL Text Input: %s\n", SDL_GetError());
-    SDL_StopTextInput(window);
-    TTF_CloseFont(font);
-    SDL_DestroyTexture(charsTex);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    TTF_Quit();
-    SDL_Quit();
-    free_dic(&wordList);
+    free_gui(&gui);
     return (1);
   }
 
-  char *word = get_random_word(&wordList);
-  Gui gui = {{window, renderer, charsTex, textTex, font, 1},
-             {&wordList, word, {0}, 0}};
+  gui.game.word = get_random_word(&wordList);
+  gui.sdl.loopRunning = 1;
   while (gui.sdl.loopRunning) {
     wordle_logic(&gui);
     render_wordle(&gui);
   }
 
-  SDL_StopTextInput(window);
-  TTF_CloseFont(font);
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(window);
-  TTF_Quit();
-  SDL_Quit();
-  free_dic(&wordList);
+  free_gui(&gui);
   return (0);
 }
