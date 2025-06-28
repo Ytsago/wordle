@@ -15,7 +15,7 @@ static int test_word(t_vector *list, Guess *guess, char *word) {
   return (1);
 }
 
-void wordle_logic(Gui *gui) {
+int wordle_logic(Gui *gui) {
   SDL_Event event;
   Guess *guess = &gui->game.guesses[gui->game.currentGuess];
   while (SDL_PollEvent(&event)) {
@@ -55,4 +55,5 @@ void wordle_logic(Gui *gui) {
       break;
     }
   }
+  return (0);
 }

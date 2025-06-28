@@ -32,7 +32,7 @@ typedef struct Gui {
   GameState game;
 } Gui;
 
-void wordle_logic(Gui *gui);
+int wordle_logic(Gui *gui);
 void render_wordle(Gui *gui);
 
 #endif // WORDLEGUI_H
