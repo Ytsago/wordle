@@ -47,8 +47,12 @@ void render_wordle(Gui *gui) {
                                draw_col[2], 255);
       }
       SDL_RenderFillRect(gui->sdl.renderer, &dst);
-      SDL_SetRenderDrawColor(gui->sdl.renderer, 255, 255, 255, 255);
+      if (gi <= gui->game.currentGuess)
+        SDL_SetRenderDrawColor(gui->sdl.renderer, 255, 255, 255, 255);
+      else
+        SDL_SetRenderDrawColor(gui->sdl.renderer, 100, 100, 100, 255);
       SDL_RenderRect(gui->sdl.renderer, &dst);
+      SDL_SetRenderDrawColor(gui->sdl.renderer, 255, 255, 255, 255);
       if (c) {
         SDL_FRect src = {
             .x = (c - 'a') * 64.f,
