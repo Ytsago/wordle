@@ -12,6 +12,13 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define GUIASSERTERROR(gui, expr, str)                                         \
+  if (expr) {                                                                  \
+    dprintf(2, "%s: %s\n", str, SDL_GetError());                               \
+    free_gui(&gui);                                                            \
+    return (1);                                                                \
+  };
+
 static SDL_Texture *load_bmp_texture(SDL_Renderer *renderer, char *path) {
   SDL_Surface *surface = SDL_LoadBMP(path);
   if (surface == NULL)
@@ -71,22 +78,10 @@ int main(int argc, char **argv) {
   printf("Using SDL v%d.%d.%d\n", SDL_VERSIONNUM_MAJOR(sdl_version),
          SDL_VERSIONNUM_MINOR(sdl_version), SDL_VERSIONNUM_MICRO(sdl_version));
 
-  if (!SDL_Init(SDL_INIT_VIDEO)) {
-    dprintf(2, "Failed to initialize SDL: %s\n", SDL_GetError());
-    free_gui(&gui);
-    return (1);
-  }
-  if (!TTF_Init()) {
-    dprintf(2, "Failed to initialize SDL ttf: %s\n", SDL_GetError());
-    free_gui(&gui);
-    return (1);
-  }
+  GUIASSERTERROR(gui, !SDL_Init(SDL_INIT_VIDEO), "Failed to initialize SDL");
+  GUIASSERTERROR(gui, !TTF_Init(), "Failed to initialize SDL ttf");
   gui.sdl.window = SDL_CreateWindow("wordle gui", 1280, 720, 0);
-  if (gui.sdl.window == NULL) {
-    dprintf(2, "Failed to create SDL window: %s\n", SDL_GetError());
-    free_gui(&gui);
-    return (1);
-  }
+  GUIASSERTERROR(gui, gui.sdl.window == NULL, "Failed to create SDL window");
 
   char *rendererName = NULL;
   // NOTE: Keeping this for future debugging using renderdoc
@@ -102,36 +97,20 @@ int main(int argc, char **argv) {
   // printf("\nSelecting driver: %s\n", rendererName);
 
   gui.sdl.renderer = SDL_CreateRenderer(gui.sdl.window, rendererName);
-  if (gui.sdl.renderer == NULL) {
-    dprintf(2, "Failed to create SDL renderer: %s\n", SDL_GetError());
-    free_gui(&gui);
-    return (1);
-  }
-  if (!SDL_SetRenderVSync(gui.sdl.renderer, SDL_RENDERER_VSYNC_ADAPTIVE)) {
-    dprintf(2, "Failed to enable VSync: %s\n", SDL_GetError());
-    free_gui(&gui);
-    return (1);
-  }
+  GUIASSERTERROR(gui, gui.sdl.renderer == NULL,
+                 "Failed to create SDL renderer");
+  GUIASSERTERROR(
+      gui, !SDL_SetRenderVSync(gui.sdl.renderer, SDL_RENDERER_VSYNC_ADAPTIVE),
+      "Failed to enable VSync");
 
   gui.sdl.charsTex = load_bmp_texture(gui.sdl.renderer, "res/chars.bmp");
-  if (gui.sdl.charsTex == NULL) {
-    dprintf(2, "Failed to load chars bitmap: %s\n", SDL_GetError());
-    free_gui(&gui);
-    return (1);
-  }
+  GUIASSERTERROR(gui, gui.sdl.charsTex == NULL, "Failed to load chars bitmap");
 
   gui.sdl.font = TTF_OpenFont("res/Ubuntu-Regular.ttf", 24);
-  if (gui.sdl.font == NULL) {
-    dprintf(2, "Failed to load ttf font: %s\n", SDL_GetError());
-    free_gui(&gui);
-    return (1);
-  }
+  GUIASSERTERROR(gui, gui.sdl.font == NULL, "Failed to load ttf font");
 
-  if (!SDL_StartTextInput(gui.sdl.window)) {
-    dprintf(2, "Failed to start SDL Text Input: %s\n", SDL_GetError());
-    free_gui(&gui);
-    return (1);
-  }
+  GUIASSERTERROR(gui, !SDL_StartTextInput(gui.sdl.window),
+                 "Failed to start SDL Text Input");
 
   SDL_Surface *textSurface = TTF_RenderText_Blended(
       gui.sdl.font, "Hello, world!", 0, (SDL_Color){255, 255, 255, 255});
@@ -140,11 +119,7 @@ int main(int argc, char **argv) {
         SDL_CreateTextureFromSurface(gui.sdl.renderer, textSurface);
     SDL_DestroySurface(textSurface);
   }
-  if (gui.sdl.textStatus == NULL) {
-    dprintf(2, "Failed to start SDL Text Input: %s\n", SDL_GetError());
-    free_gui(&gui);
-    return (1);
-  }
+  GUIASSERTERROR(gui, gui.sdl.textStatus == NULL, "Failed to pre-render text");
 
   gui.game.word = get_random_word(&wordList);
   gui.sdl.loopRunning = 1;
