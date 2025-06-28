@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
   gui.game.word = get_random_word(&wordList);
   gui.sdl.loopRunning = 1;
   while (gui.sdl.loopRunning) {
-    GUIASSERTERROR(gui, wordle_logic(&gui), "Error during game loop");
+    GUIASSERTERROR(gui, !wordle_logic(&gui), "Error during game loop");
     render_wordle(&gui);
   }
 
