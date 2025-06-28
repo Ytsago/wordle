@@ -62,7 +62,7 @@ void render_wordle(Gui *gui) {
   }
   if (gui->sdl.textStatus) {
     SDL_FRect dst = {
-        .x = start_x,
+        .x = 10.f,
         .y = start_y + offset_y * 7.f + 64.f * 6.f,
         .w = gui->sdl.textStatus->w,
         .h = gui->sdl.textStatus->h,

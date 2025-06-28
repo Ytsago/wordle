@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
 
   GUIASSERTERROR(gui, !SDL_Init(SDL_INIT_VIDEO), "Failed to initialize SDL");
   GUIASSERTERROR(gui, !TTF_Init(), "Failed to initialize SDL ttf");
-  gui.sdl.window = SDL_CreateWindow("wordle gui", 1280, 720, 0);
+  gui.sdl.window = SDL_CreateWindow("wordle gui", 390, 550, 0);
   GUIASSERTERROR(gui, gui.sdl.window == NULL, "Failed to create SDL window");
 
   char *rendererName = NULL;
@@ -111,15 +111,6 @@ int main(int argc, char **argv) {
 
   GUIASSERTERROR(gui, !SDL_StartTextInput(gui.sdl.window),
                  "Failed to start SDL Text Input");
-
-  SDL_Surface *textSurface = TTF_RenderText_Blended(
-      gui.sdl.font, "Hello, world!", 0, (SDL_Color){255, 255, 255, 255});
-  if (textSurface) {
-    gui.sdl.textStatus =
-        SDL_CreateTextureFromSurface(gui.sdl.renderer, textSurface);
-    SDL_DestroySurface(textSurface);
-  }
-  GUIASSERTERROR(gui, gui.sdl.textStatus == NULL, "Failed to pre-render text");
 
   gui.game.word = get_random_word(&wordList);
   gui.sdl.loopRunning = 1;
