@@ -3,6 +3,7 @@
 
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_video.h"
+#include "libft.h"
 
 typedef struct SDLContext {
   SDL_Window *window;
@@ -17,6 +18,8 @@ typedef struct Guess {
 } Guess;
 
 typedef struct GameState {
+  t_vector *wordList;
+  char *word;
   Guess guesses[6];
   int currentGuess;
 } GameState;

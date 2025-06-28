@@ -4,8 +4,11 @@
 #include "SDL3/SDL_surface.h"
 #include "SDL3/SDL_version.h"
 #include "SDL3/SDL_video.h"
+#include "wordle.h"
 #include "wordlegui.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 static SDL_Texture *load_bmp_texture(SDL_Renderer *renderer, char *path) {
   SDL_Surface *surface = SDL_LoadBMP(path);
@@ -16,9 +19,28 @@ static SDL_Texture *load_bmp_texture(SDL_Renderer *renderer, char *path) {
   return (texture);
 }
 
+// TODO: better error handling, remove repetitions
 int main(int argc, char **argv) {
   (void)argc;
   (void)argv;
+
+  srand(time(NULL));
+  if (argc != 2) {
+    dprintf(2, "Usage: %s <words.txt>\n", argv[0]);
+    return (1);
+  }
+  t_vector wordList;
+  switch (parse_file(&wordList, argv[1])) {
+  case -1:
+    dprintf(2, "Failed to load words: system error\n");
+    break;
+  case -2:
+    dprintf(2, "Failed to load words: invalid file format\n");
+    break;
+  case -3:
+    dprintf(2, "Failed to load words: not enough words\n");
+    break;
+  }
 
   int sdl_version = SDL_GetVersion();
   printf("Using SDL v%d.%d.%d\n", SDL_VERSIONNUM_MAJOR(sdl_version),
@@ -26,12 +48,14 @@ int main(int argc, char **argv) {
 
   if (!SDL_Init(SDL_INIT_VIDEO)) {
     dprintf(2, "Failed to initialize SDL: %s\n", SDL_GetError());
+    free_dic(&wordList);
     return (1);
   }
   SDL_Window *window = SDL_CreateWindow("wordle gui", 1280, 720, 0);
   if (window == NULL) {
     dprintf(2, "Failed to create SDL window: %s\n", SDL_GetError());
     SDL_Quit();
+    free_dic(&wordList);
     return (1);
   }
 
@@ -53,6 +77,7 @@ int main(int argc, char **argv) {
     dprintf(2, "Failed to create SDL renderer: %s\n", SDL_GetError());
     SDL_DestroyWindow(window);
     SDL_Quit();
+    free_dic(&wordList);
     return (1);
   }
   if (!SDL_SetRenderVSync(renderer, SDL_RENDERER_VSYNC_ADAPTIVE)) {
@@ -60,6 +85,7 @@ int main(int argc, char **argv) {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+    free_dic(&wordList);
     return (1);
   }
 
@@ -69,6 +95,7 @@ int main(int argc, char **argv) {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+    free_dic(&wordList);
     return (1);
   }
 
@@ -78,10 +105,13 @@ int main(int argc, char **argv) {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+    free_dic(&wordList);
     return (1);
   }
 
-  Gui gui = {{window, renderer, charsTex, 1}, {0}};
+  char *word = get_random_word(&wordList);
+  printf("Word is: %s\n", word);
+  Gui gui = {{window, renderer, charsTex, 1}, {&wordList, word, {0}, 0}};
   while (gui.sdl.loopRunning) {
     wordle_logic(&gui);
     render_wordle(&gui);
@@ -91,5 +121,6 @@ int main(int argc, char **argv) {
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
+  free_dic(&wordList);
   return (0);
 }

@@ -51,7 +51,7 @@ void render_wordle(Gui *gui) {
       SDL_RenderRect(gui->sdl.renderer, &dst);
       if (c) {
         SDL_FRect src = {
-            .x = (c - 'A') * 64.f,
+            .x = (c - 'a') * 64.f,
             .y = 0.f,
             .w = 64.f,
             .h = 64.f,
