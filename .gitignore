@@ -1,0 +1,13 @@
+# Build files
+*.o
+*.a
+*.d
+obj/
+dep/
+build/
+wordle
+
+# Clangd files
+compile_flags.txt
+compile_commands.json
+.clangd
