@@ -44,6 +44,8 @@ typedef struct Confetti {
   float angle;
   float angularVelocity;
   float angularDrag;
+  float flipSine;
+  float flipVel;
   int textureIndex;
 } Confetti;
 

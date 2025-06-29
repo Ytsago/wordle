@@ -1,5 +1,6 @@
 #include "SDL3/SDL_rect.h"
 #include "SDL3/SDL_render.h"
+#include "SDL3/SDL_surface.h"
 #include "wordlegui.h"
 #include <math.h>
 #include <stdlib.h>
@@ -14,6 +15,7 @@ static void init_confetti(WinAnimation *win, int textureCount) {
   const double pi_2 = pi / 2.;
   const double pi_4 = pi / 4.;
   const double pi_6 = pi / 6.;
+  const double pi_8 = pi / 8.;
   const double pi_5_6 = pi - pi_6;
 
   for (int i = 0; i < win->confettiAmount; i++) {
@@ -33,6 +35,8 @@ static void init_confetti(WinAnimation *win, int textureCount) {
     cft->angularVelocity = random_float(10.f) - 5.f;
     cft->angularDrag = random_float(0.1f) + 1.05f;
     cft->textureIndex = rand() % textureCount;
+    cft->flipSine = random_float(pi);
+    cft->flipVel = (random_float(pi_4) - pi_8) * 0.06125f;
   }
   win->started = 1;
 }
@@ -56,14 +60,17 @@ void render_confetti(Gui *gui) {
     cft->x += cft->vx;
     cft->y += cft->vy;
     cft->angle += cft->angularVelocity;
+    cft->flipSine += cft->flipVel;
     if (cft->y > (550.f + confetti_square))
       continue;
     all_offscreen = 0;
+    float height = confetti_square * cos(cft->flipSine);
+    SDL_FlipMode flip = height < 0 ? SDL_FLIP_VERTICAL : 0;
     SDL_FRect dst = {
         .x = cft->x - confetti_square / 2.f,
         .y = cft->y - confetti_square / 2.f,
         .w = confetti_square,
-        .h = confetti_square,
+        .h = height,
     };
     SDL_FRect src = {
         .x = cft->textureIndex * confetti_square,
@@ -72,7 +79,7 @@ void render_confetti(Gui *gui) {
         .h = confetti_square,
     };
     SDL_RenderTextureRotated(gui->sdl.renderer, gui->sdl.confetti, &src, &dst,
-                             cft->angle, NULL, 0);
+                             cft->angle, NULL, flip);
   }
   if (all_offscreen)
     win->finished = 1;
