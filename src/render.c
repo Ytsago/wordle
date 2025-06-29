@@ -120,8 +120,6 @@ void render_wordle(Gui *gui) {
           .h = 64.f,
       };
       if (ref == 1) {
-        // TODO: put crosses
-        // SDL_RenderTexture(gui->sdl.renderer, gui->sdl.cross, NULL, &dst);
         SDL_SetRenderDrawColor(gui->sdl.renderer, 255, 0, 0, 100);
         SDL_RenderFillRect(gui->sdl.renderer, &dst);
       } else if (ref == 2) {
