@@ -144,8 +144,11 @@ int main(int argc, char **argv) {
   gui.game.word = get_random_word(&wordList);
   gui.sdl.loopRunning = 1;
   while (gui.sdl.loopRunning) {
+    SDL_SetRenderDrawColor(gui.sdl.renderer, 35, 35, 35, 255);
+    SDL_RenderClear(gui.sdl.renderer);
     GUIASSERTERROR(gui, !wordle_logic(&gui), "Error during game loop");
     render_wordle(&gui);
+    SDL_RenderPresent(gui.sdl.renderer);
   }
 
   free_gui(&gui);

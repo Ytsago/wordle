@@ -15,14 +15,10 @@ void render_wordle(Gui *gui) {
   const float reference_start_y = 50.f;
   const float text_y = start_y + offset_y * 7.f + square_size * 6.f;
 
-  const int bg_col[3] = {35, 35, 35};
+  const int gray_col[3] = {75, 75, 75};
   const int yellow_col[3] = {232, 213, 65};
   const int green_col[3] = {53, 204, 86};
   const int red_col[3] = {230, 55, 55};
-
-  SDL_SetRenderDrawColor(gui->sdl.renderer, bg_col[0], bg_col[1], bg_col[2],
-                         255);
-  SDL_RenderClear(gui->sdl.renderer);
 
   for (int gi = 0; gi < 6; gi++) {
     Guess *guess = &gui->game.guesses[gi];
@@ -34,11 +30,11 @@ void render_wordle(Gui *gui) {
           .w = square_size,
           .h = square_size,
       };
-      {
+      if (gi < gui->game.currentGuess) {
         const int *draw_col;
         switch (guess->state[ci]) {
         case 0:
-          draw_col = bg_col;
+          draw_col = gray_col;
           break;
         case 1:
           draw_col = yellow_col;
@@ -52,8 +48,8 @@ void render_wordle(Gui *gui) {
         }
         SDL_SetRenderDrawColor(gui->sdl.renderer, draw_col[0], draw_col[1],
                                draw_col[2], 255);
+        SDL_RenderFillRect(gui->sdl.renderer, &dst);
       }
-      SDL_RenderFillRect(gui->sdl.renderer, &dst);
       if (gi <= gui->game.currentGuess)
         SDL_SetRenderDrawColor(gui->sdl.renderer, 255, 255, 255, 255);
       else
@@ -138,5 +134,4 @@ void render_wordle(Gui *gui) {
     };
     SDL_RenderTexture(gui->sdl.renderer, gui->sdl.playAgainLabel, NULL, &dst);
   }
-  SDL_RenderPresent(gui->sdl.renderer);
 }
