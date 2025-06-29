@@ -70,7 +70,6 @@ int main(int argc, char **argv) {
   (void)argc;
   (void)argv;
 
-  srand(time(NULL) / 86400);
   if (argc != 2) {
     dprintf(2, "Usage: %s <words.txt>\n", argv[0]);
     return (1);
@@ -152,7 +151,9 @@ int main(int argc, char **argv) {
   GUIASSERTERROR(gui, !SDL_StartTextInput(gui.sdl.window),
                  "Failed to start SDL Text Input");
 
+  srand(time(NULL) / 86400);
   gui.game.word = get_random_word(&wordList);
+  srand(time(NULL));
   gui.sdl.loopRunning = 1;
   while (gui.sdl.loopRunning) {
     SDL_SetRenderDrawColor(gui.sdl.renderer, 35, 35, 35, 255);
