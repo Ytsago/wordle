@@ -45,7 +45,7 @@ static int test_word(Gui *gui) {
   }
   if (s[0] == 2 && s[1] == 2 && s[2] == 2 && s[3] == 2 && s[4] == 2) {
     gui->game.end = 1;
-    return (build_text(gui, "Congratulation!!") | 1);
+    return (build_text(gui, "Congratulations!!") | 1);
   }
   gui->game.currentGuess++;
   if (gui->game.currentGuess == 6) {
