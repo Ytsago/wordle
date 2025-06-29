@@ -29,9 +29,22 @@ static SDL_Texture *load_bmp_texture(SDL_Renderer *renderer, char *path) {
   return (texture);
 }
 
+static SDL_Texture *render_text(SDL_Renderer *renderer, TTF_Font *font,
+                                const char *text) {
+  SDL_Surface *surface =
+      TTF_RenderText_Blended(font, text, 0, (SDL_Color){255, 255, 255, 255});
+  if (surface == NULL)
+    return (NULL);
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+  SDL_DestroySurface(surface);
+  return (texture);
+}
+
 static void free_gui(Gui *gui) {
   if (gui->sdl.window && SDL_TextInputActive(gui->sdl.window))
     SDL_StopTextInput(gui->sdl.window);
+  if (gui->sdl.playAgainLabel)
+    SDL_DestroyTexture(gui->sdl.playAgainLabel);
   if (gui->sdl.referenceLabel)
     SDL_DestroyTexture(gui->sdl.referenceLabel);
   if (gui->sdl.font)
@@ -55,7 +68,7 @@ int main(int argc, char **argv) {
   (void)argc;
   (void)argv;
 
-  srand(time(NULL));
+  srand(time(NULL) / 86400);
   if (argc != 2) {
     dprintf(2, "Usage: %s <words.txt>\n", argv[0]);
     return (1);
@@ -83,7 +96,7 @@ int main(int argc, char **argv) {
 
   GUIASSERTERROR(gui, !SDL_Init(SDL_INIT_VIDEO), "Failed to initialize SDL");
   GUIASSERTERROR(gui, !TTF_Init(), "Failed to initialize SDL ttf");
-  gui.sdl.window = SDL_CreateWindow("wordle gui", 782, 550, 0);
+  gui.sdl.window = SDL_CreateWindow("wordle gui", 780, 550, 0);
   GUIASSERTERROR(gui, gui.sdl.window == NULL, "Failed to create SDL window");
 
   char *rendererName = NULL;
@@ -115,17 +128,15 @@ int main(int argc, char **argv) {
   gui.sdl.font = TTF_OpenFont("res/Ubuntu-Regular.ttf", 24);
   GUIASSERTERROR(gui, gui.sdl.font == NULL, "Failed to load ttf font");
 
-  {
-    SDL_Surface *textSurf = TTF_RenderText_Blended(
-        gui.sdl.font, "Reference", 0, (SDL_Color){255, 255, 255, 255});
-    if (textSurf) {
-      gui.sdl.referenceLabel =
-          SDL_CreateTextureFromSurface(gui.sdl.renderer, textSurf);
-      SDL_DestroySurface(textSurf);
-    }
-    GUIASSERTERROR(gui, gui.sdl.referenceLabel == NULL,
-                   "Failed to create reference label text");
-  }
+  gui.sdl.referenceLabel =
+      render_text(gui.sdl.renderer, gui.sdl.font, "Reference");
+  GUIASSERTERROR(gui, gui.sdl.referenceLabel == NULL,
+                 "Failed to pre-render reference label");
+
+  gui.sdl.playAgainLabel =
+      render_text(gui.sdl.renderer, gui.sdl.font, "Press ENTER to play again");
+  GUIASSERTERROR(gui, gui.sdl.playAgainLabel == NULL,
+                 "Failed to pre-render play again text");
 
   GUIASSERTERROR(gui, !SDL_StartTextInput(gui.sdl.window),
                  "Failed to start SDL Text Input");

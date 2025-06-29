@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.16)
 project(wordlegui LANGUAGES C VERSION "0.1.0")
 
 include(FetchContent)
+set(FETCHCONTENT_QUIET OFF)
 FetchContent_Declare(
 	SDL3
 	GIT_REPOSITORY "https://github.com/libsdl-org/SDL"

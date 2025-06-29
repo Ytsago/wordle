@@ -8,4 +8,7 @@ build:
 run: build
 	build/wordlegui words.txt
 
-.PHONY: build run
+clean:
+	rm -rf build
+
+.PHONY: build run clean

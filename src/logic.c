@@ -1,4 +1,3 @@
-#include "SDL3/SDL_keyboard.h"
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_stdinc.h"
 #include "SDL3/SDL_surface.h"
@@ -6,7 +5,9 @@
 #include "wordle.h"
 #include "wordlegui.h"
 #include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 static int build_text(Gui *gui, const char *str) {
   if (gui->sdl.textStatus) {
@@ -43,7 +44,7 @@ static int test_word(Gui *gui) {
       *ref = 2;
   }
   if (s[0] == 2 && s[1] == 2 && s[2] == 2 && s[3] == 2 && s[4] == 2) {
-    SDL_StopTextInput(gui->sdl.window);
+    gui->game.end = 1;
     return (build_text(gui, "Congratulation!!") | 1);
   }
   gui->game.currentGuess++;
@@ -51,7 +52,7 @@ static int test_word(Gui *gui) {
     char gameover[64] = {0};
     SDL_strlcat(gameover, "Game Over! The word was ", 64);
     SDL_strlcat(gameover, gui->game.word, 64);
-    SDL_StopTextInput(gui->sdl.window);
+    gui->game.end = 1;
     return (build_text(gui, gameover) | 1);
   }
   return (1);
@@ -64,9 +65,22 @@ static void clear_state(Gui *gui) {
   gui->sdl.textStatus = NULL;
 }
 
+static void reset_game(Gui *gui) {
+  void *vectorBak = gui->game.wordList;
+  memset(&gui->game, 0, sizeof(gui->game));
+  gui->game.wordList = vectorBak;
+  srand(time(NULL));
+  gui->game.word = get_random_word(gui->game.wordList);
+  if (gui->sdl.textStatus) {
+    SDL_DestroyTexture(gui->sdl.textStatus);
+    gui->sdl.textStatus = NULL;
+  }
+}
+
 int wordle_logic(Gui *gui) {
   SDL_Event event;
   Guess *guess = &gui->game.guesses[gui->game.currentGuess];
+  int reset = 0;
 
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
@@ -75,7 +89,7 @@ int wordle_logic(Gui *gui) {
       break;
 
     case SDL_EVENT_TEXT_INPUT:
-      if (gui->game.currentGuess >= 6 || strlen(guess->guess) >= 5)
+      if (gui->game.end || strlen(guess->guess) >= 5)
         break;
       char chars[2] = {0};
       chars[0] = event.text.text[0];
@@ -87,9 +101,11 @@ int wordle_logic(Gui *gui) {
       break;
 
     case SDL_EVENT_KEY_DOWN:
-      if (gui->game.currentGuess >= 6)
-        break;
       if (event.key.key == SDLK_RETURN) {
+        if (gui->game.end) {
+          reset = 1;
+          continue;
+        }
         switch (test_word(gui)) {
         case 0:
           for (unsigned long i = 0; i < strlen(guess->guess); i++)
@@ -99,6 +115,8 @@ int wordle_logic(Gui *gui) {
           return (0);
         }
       }
+      if (gui->game.end)
+        break;
       if (event.key.key == SDLK_BACKSPACE) {
         int guessLen = strlen(guess->guess);
         if (guessLen > 0) {
@@ -109,6 +127,8 @@ int wordle_logic(Gui *gui) {
       break;
     }
   }
+  if (reset)
+    reset_game(gui);
 
   return (1);
 }
