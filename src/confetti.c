@@ -27,11 +27,11 @@ static void init_confetti(WinAnimation *win, int textureCount) {
     cft->y = 550.f;
     cft->vx = xdir * velocity;
     cft->vy = -ydir * velocity;
-    cft->gravity = 0.3f;
-    cft->drag = 1.02f;
+    cft->gravity = random_float(0.2f) + 0.2f;
+    cft->drag = random_float(0.01f) + 1.02f;
     cft->angle = random_float(2 * pi);
     cft->angularVelocity = random_float(pi_2);
-    cft->angularDrag = 1.1f;
+    cft->angularDrag = random_float(0.1f) + 1.05f;
     cft->textureIndex = rand() % textureCount;
   }
   win->started = 1;
