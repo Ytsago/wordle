@@ -6,7 +6,6 @@
 #include "SDL3_ttf/SDL_ttf.h"
 #include "libft.h"
 
-// Max power of 2 is 131072 before crashing
 #define CONFETTI_AMOUNT 1024
 
 typedef struct SDLContext {
