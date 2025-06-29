@@ -6,7 +6,7 @@
 /*   By: pabellis <pabellis@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 07:29:36 by pabellis          #+#    #+#             */
-/*   Updated: 2025/06/28 07:29:39 by pabellis         ###   ########.fr       */
+/*   Updated: 2025/06/28 18:14:49 by secros           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ int	parse_file(t_vector *word_list, char *file)
 		free_dic(word_list);
 		return (-1);
 	}
-	if (word_list->num_elements < 10)
+	if (word_list->num_elements < DIC_MIN_SIZE)
 		return (-3);
 	return (0);
 }

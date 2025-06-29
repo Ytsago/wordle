@@ -6,12 +6,14 @@
 /*   By: pabellis <pabellis@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 05:46:04 by pabellis          #+#    #+#             */
-/*   Updated: 2025/06/28 17:56:36 by secros           ###   ########.fr       */
+/*   Updated: 2025/06/28 18:13:57 by secros           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef WORDLE_H
 # define WORDLE_H
+
+# define DIC_MIN_SIZE 10
 
 # include "libft.h"
 

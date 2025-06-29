@@ -36,7 +36,7 @@ static int test_word(Gui *gui) {
   int *s = guess->state;
   if (s[0] == 2 && s[1] == 2 && s[2] == 2 && s[3] == 2 && s[4] == 2) {
     SDL_StopTextInput(gui->sdl.window);
-    return (build_text(gui, "Conglaturations!!") | 1);
+    return (build_text(gui, "Congratulation!!") | 1);
   }
   if (gui->game.currentGuess == 6) {
     char gameover[64] = {0};
