@@ -32,12 +32,12 @@ static int test_word(Gui *gui) {
     return (build_text(gui, "Unrecognized word"));
 
   get_feedback(guess->guess, gui->game.word, guess->state);
-  gui->game.currentGuess++;
   int *s = guess->state;
   if (s[0] == 2 && s[1] == 2 && s[2] == 2 && s[3] == 2 && s[4] == 2) {
     SDL_StopTextInput(gui->sdl.window);
     return (build_text(gui, "Congratulation!!") | 1);
   }
+  gui->game.currentGuess++;
   if (gui->game.currentGuess == 6) {
     char gameover[64] = {0};
     SDL_strlcat(gameover, "Game Over! The word was ", 64);
