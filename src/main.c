@@ -43,6 +43,8 @@ static SDL_Texture *render_text(SDL_Renderer *renderer, TTF_Font *font,
 static void free_gui(Gui *gui) {
   if (gui->sdl.window && SDL_TextInputActive(gui->sdl.window))
     SDL_StopTextInput(gui->sdl.window);
+  if (gui->win.confetti)
+    free(gui->win.confetti);
   if (gui->sdl.playAgainLabel)
     SDL_DestroyTexture(gui->sdl.playAgainLabel);
   if (gui->sdl.referenceLabel)
@@ -141,6 +143,11 @@ int main(int argc, char **argv) {
       render_text(gui.sdl.renderer, gui.sdl.font, "Press ENTER to play again");
   GUIASSERTERROR(gui, gui.sdl.playAgainLabel == NULL,
                  "Failed to pre-render play again text");
+
+  gui.win.confettiAmount = CONFETTI_AMOUNT;
+  gui.win.confetti = calloc(gui.win.confettiAmount, sizeof(Confetti));
+  GUIASSERTERROR(gui, gui.win.confetti == NULL,
+                 "Failed to allocate confetti array");
 
   GUIASSERTERROR(gui, !SDL_StartTextInput(gui.sdl.window),
                  "Failed to start SDL Text Input");

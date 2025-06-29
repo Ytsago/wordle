@@ -16,21 +16,21 @@ static void init_confetti(WinAnimation *win, int textureCount) {
   const double pi_6 = pi / 6.;
   const double pi_5_6 = pi - pi_6;
 
-  for (int i = 0; i < CONFETTI_AMOUNT; i++) {
+  for (int i = 0; i < win->confettiAmount; i++) {
     Confetti *cft = &win->confetti[i];
-    double angleDir = i < (CONFETTI_AMOUNT / 2) ? pi_6 : pi_5_6;
+    double angleDir = (i % 2) ? pi_6 : pi_5_6;
     double angleDirVar = random_float(pi_2) - pi_4;
     float xdir = cos(angleDir + angleDirVar);
     float ydir = sin(angleDir + angleDirVar);
     float velocity = random_float(20.f) + 5.f;
-    cft->x = i < (CONFETTI_AMOUNT / 2) ? -17.f : 797.f;
+    cft->x = (i % 2) ? -17.f : 797.f;
     cft->y = 550.f;
     cft->vx = xdir * velocity;
     cft->vy = -ydir * velocity;
     cft->gravity = random_float(0.2f) + 0.2f;
     cft->drag = random_float(0.01f) + 1.02f;
-    cft->angle = random_float(2 * pi);
-    cft->angularVelocity = random_float(pi_2);
+    cft->angle = random_float(360.f);
+    cft->angularVelocity = random_float(10.f) - 5.f;
     cft->angularDrag = random_float(0.1f) + 1.05f;
     cft->textureIndex = rand() % textureCount;
   }
@@ -47,12 +47,8 @@ void render_confetti(Gui *gui) {
     return;
 
   int all_offscreen = 1;
-  SDL_FPoint center = {
-      .x = 0.5f,
-      .y = 0.5f,
-  };
   SDL_SetRenderDrawColor(gui->sdl.renderer, 255, 255, 255, 255);
-  for (int i = 0; i < CONFETTI_AMOUNT; i++) {
+  for (int i = 0; i < gui->win.confettiAmount; i++) {
     Confetti *cft = &win->confetti[i];
     cft->vy += cft->gravity;
     cft->vx /= cft->drag;
@@ -76,7 +72,7 @@ void render_confetti(Gui *gui) {
         .h = confetti_square,
     };
     SDL_RenderTextureRotated(gui->sdl.renderer, gui->sdl.confetti, &src, &dst,
-                             cft->angle, &center, 0);
+                             cft->angle, NULL, 0);
   }
   if (all_offscreen)
     win->finished = 1;

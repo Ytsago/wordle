@@ -51,7 +51,8 @@ typedef struct Confetti {
 typedef struct WinAnimation {
   int started;
   int finished;
-  Confetti confetti[CONFETTI_AMOUNT];
+  Confetti *confetti;
+  int confettiAmount;
 } WinAnimation;
 
 typedef struct Gui {

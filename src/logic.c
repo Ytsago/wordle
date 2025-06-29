@@ -68,7 +68,9 @@ static void clear_state(Gui *gui) {
 static void reset_game(Gui *gui) {
   void *vectorBak = gui->game.wordList;
   memset(&gui->game, 0, sizeof(gui->game));
-  memset(&gui->win, 0, sizeof(gui->win));
+  gui->win.started = 0;
+  gui->win.finished = 0;
+  memset(gui->win.confetti, 0, sizeof(Confetti) * gui->win.confettiAmount);
   gui->game.wordList = vectorBak;
   srand(time(NULL));
   gui->game.word = get_random_word(gui->game.wordList);
