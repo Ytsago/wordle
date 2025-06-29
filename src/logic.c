@@ -44,7 +44,7 @@ static int test_word(Gui *gui) {
       *ref = 2;
   }
   if (s[0] == 2 && s[1] == 2 && s[2] == 2 && s[3] == 2 && s[4] == 2) {
-    gui->game.end = 1;
+    gui->game.end = 2;
     return (build_text(gui, "Congratulations!!") | 1);
   }
   gui->game.currentGuess++;
@@ -68,6 +68,7 @@ static void clear_state(Gui *gui) {
 static void reset_game(Gui *gui) {
   void *vectorBak = gui->game.wordList;
   memset(&gui->game, 0, sizeof(gui->game));
+  memset(&gui->win, 0, sizeof(gui->win));
   gui->game.wordList = vectorBak;
   srand(time(NULL));
   gui->game.word = get_random_word(gui->game.wordList);

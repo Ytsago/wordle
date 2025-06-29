@@ -125,6 +125,10 @@ int main(int argc, char **argv) {
   gui.sdl.charsTex = load_bmp_texture(gui.sdl.renderer, "res/chars.bmp");
   GUIASSERTERROR(gui, gui.sdl.charsTex == NULL, "Failed to load chars bitmap");
 
+  gui.sdl.confetti = load_bmp_texture(gui.sdl.renderer, "res/confetti.bmp");
+  GUIASSERTERROR(gui, gui.sdl.confetti == NULL,
+                 "Failed to load confetti bitmap");
+
   gui.sdl.font = TTF_OpenFont("res/Ubuntu-Regular.ttf", 24);
   GUIASSERTERROR(gui, gui.sdl.font == NULL, "Failed to load ttf font");
 
@@ -148,6 +152,8 @@ int main(int argc, char **argv) {
     SDL_RenderClear(gui.sdl.renderer);
     GUIASSERTERROR(gui, !wordle_logic(&gui), "Error during game loop");
     render_wordle(&gui);
+    if (gui.game.end == 2)
+      render_confetti(&gui);
     SDL_RenderPresent(gui.sdl.renderer);
   }
 
