@@ -30,7 +30,7 @@ void render_wordle(Gui *gui) {
           .w = square_size,
           .h = square_size,
       };
-      if (gi < gui->game.currentGuess) {
+      if (gi < (gui->game.currentGuess + (gui->game.end > 0))) {
         const int *draw_col;
         switch (guess->state[ci]) {
         case 0:
