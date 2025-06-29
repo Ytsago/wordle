@@ -7,6 +7,8 @@ void render_wordle(Gui *gui) {
   const float start_y = 25.f;
   const float offset_x = 5.f;
   const float offset_y = 10.f;
+  const float square_size = 64.f;
+  const float middle_x = start_x + offset_x * 2.f + square_size * 2.5f;
 
   const int bg_col[3] = {35, 35, 35};
   const int yellow_col[3] = {232, 213, 65};
@@ -22,10 +24,10 @@ void render_wordle(Gui *gui) {
     for (int ci = 0; ci < 5; ci++) {
       char c = guess->guess[ci];
       SDL_FRect dst = {
-          .x = start_x + ci * 64 + offset_x * ci,
-          .y = start_y + gi * 64 + offset_y * gi,
-          .w = 64,
-          .h = 64,
+          .x = start_x + ci * square_size + offset_x * ci,
+          .y = start_y + gi * square_size + offset_y * gi,
+          .w = square_size,
+          .h = square_size,
       };
       {
         const int *draw_col;
@@ -55,10 +57,10 @@ void render_wordle(Gui *gui) {
       SDL_SetRenderDrawColor(gui->sdl.renderer, 255, 255, 255, 255);
       if (c) {
         SDL_FRect src = {
-            .x = (c - 'a') * 64.f,
+            .x = (c - 'a') * square_size,
             .y = 0.f,
-            .w = 64.f,
-            .h = 64.f,
+            .w = square_size,
+            .h = square_size,
         };
         SDL_RenderTexture(gui->sdl.renderer, gui->sdl.charsTex, &src, &dst);
       }
@@ -66,8 +68,8 @@ void render_wordle(Gui *gui) {
   }
   if (gui->sdl.textStatus) {
     SDL_FRect dst = {
-        .x = 10.f,
-        .y = start_y + offset_y * 7.f + 64.f * 6.f,
+        .x = middle_x - gui->sdl.textStatus->w * 0.5f,
+        .y = start_y + offset_y * 7.f + square_size * 6.f,
         .w = gui->sdl.textStatus->w,
         .h = gui->sdl.textStatus->h,
     };
