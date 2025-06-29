@@ -1,3 +1,4 @@
+#include "SDL3/SDL_blendmode.h"
 #include "SDL3/SDL_error.h"
 #include "SDL3/SDL_init.h"
 #include "SDL3/SDL_keyboard.h"
@@ -31,6 +32,8 @@ static SDL_Texture *load_bmp_texture(SDL_Renderer *renderer, char *path) {
 static void free_gui(Gui *gui) {
   if (gui->sdl.window && SDL_TextInputActive(gui->sdl.window))
     SDL_StopTextInput(gui->sdl.window);
+  if (gui->sdl.referenceLabel)
+    SDL_DestroyTexture(gui->sdl.referenceLabel);
   if (gui->sdl.font)
     TTF_CloseFont(gui->sdl.font);
   if (gui->sdl.charsTex)
@@ -80,7 +83,7 @@ int main(int argc, char **argv) {
 
   GUIASSERTERROR(gui, !SDL_Init(SDL_INIT_VIDEO), "Failed to initialize SDL");
   GUIASSERTERROR(gui, !TTF_Init(), "Failed to initialize SDL ttf");
-  gui.sdl.window = SDL_CreateWindow("wordle gui", 390, 550, 0);
+  gui.sdl.window = SDL_CreateWindow("wordle gui", 782, 550, 0);
   GUIASSERTERROR(gui, gui.sdl.window == NULL, "Failed to create SDL window");
 
   char *rendererName = NULL;
@@ -102,12 +105,27 @@ int main(int argc, char **argv) {
   GUIASSERTERROR(
       gui, !SDL_SetRenderVSync(gui.sdl.renderer, SDL_RENDERER_VSYNC_ADAPTIVE),
       "Failed to enable VSync");
+  GUIASSERTERROR(
+      gui, !SDL_SetRenderDrawBlendMode(gui.sdl.renderer, SDL_BLENDMODE_BLEND),
+      "Failed to set render blend mode");
 
   gui.sdl.charsTex = load_bmp_texture(gui.sdl.renderer, "res/chars.bmp");
   GUIASSERTERROR(gui, gui.sdl.charsTex == NULL, "Failed to load chars bitmap");
 
   gui.sdl.font = TTF_OpenFont("res/Ubuntu-Regular.ttf", 24);
   GUIASSERTERROR(gui, gui.sdl.font == NULL, "Failed to load ttf font");
+
+  {
+    SDL_Surface *textSurf = TTF_RenderText_Blended(
+        gui.sdl.font, "Reference", 0, (SDL_Color){255, 255, 255, 255});
+    if (textSurf) {
+      gui.sdl.referenceLabel =
+          SDL_CreateTextureFromSurface(gui.sdl.renderer, textSurf);
+      SDL_DestroySurface(textSurf);
+    }
+    GUIASSERTERROR(gui, gui.sdl.referenceLabel == NULL,
+                   "Failed to create reference label text");
+  }
 
   GUIASSERTERROR(gui, !SDL_StartTextInput(gui.sdl.window),
                  "Failed to start SDL Text Input");

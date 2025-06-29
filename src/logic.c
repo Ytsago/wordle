@@ -33,6 +33,15 @@ static int test_word(Gui *gui) {
 
   get_feedback(guess->guess, gui->game.word, guess->state);
   int *s = guess->state;
+  for (int i = 0; i < 5; i++) {
+    char *ref = &gui->game.reference[guess->guess[i] - 'a'];
+    if (*ref == 2)
+      continue;
+    if (s[i] == 0)
+      *ref = 1;
+    if (s[i] == 1 || s[i] == 2)
+      *ref = 2;
+  }
   if (s[0] == 2 && s[1] == 2 && s[2] == 2 && s[3] == 2 && s[4] == 2) {
     SDL_StopTextInput(gui->sdl.window);
     return (build_text(gui, "Congratulation!!") | 1);

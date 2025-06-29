@@ -11,6 +11,7 @@ typedef struct SDLContext {
   SDL_Renderer *renderer;
   SDL_Texture *charsTex;
   SDL_Texture *textStatus;
+  SDL_Texture *referenceLabel;
   TTF_Font *font;
   int loopRunning;
 } SDLContext;
@@ -25,6 +26,7 @@ typedef struct GameState {
   char *word;
   Guess guesses[6];
   int currentGuess;
+  char reference[26];
 } GameState;
 
 typedef struct Gui {

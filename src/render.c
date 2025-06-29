@@ -9,6 +9,10 @@ void render_wordle(Gui *gui) {
   const float offset_y = 10.f;
   const float square_size = 64.f;
   const float middle_x = start_x + offset_x * 2.f + square_size * 2.5f;
+  const float reference_start_x =
+      start_x * 2.f + offset_x * 4.f + square_size * 5.f;
+  const float reference_label_y = 15.f;
+  const float reference_start_y = 50.f;
 
   const int bg_col[3] = {35, 35, 35};
   const int yellow_col[3] = {232, 213, 65};
@@ -75,6 +79,56 @@ void render_wordle(Gui *gui) {
     };
     SDL_SetRenderDrawColor(gui->sdl.renderer, 255, 255, 255, 255);
     SDL_RenderTexture(gui->sdl.renderer, gui->sdl.textStatus, NULL, &dst);
+  }
+  {
+    SDL_SetRenderDrawColor(gui->sdl.renderer, 100, 100, 100, 255);
+    SDL_RenderLine(gui->sdl.renderer, reference_start_x, 0.f, reference_start_x,
+                   550.f);
+  }
+  {
+    SDL_SetRenderDrawColor(gui->sdl.renderer, 255, 255, 255, 255);
+    SDL_FRect dst = {
+        .x = reference_start_x + start_x,
+        .y = reference_label_y,
+        .w = gui->sdl.referenceLabel->w,
+        .h = gui->sdl.referenceLabel->h,
+    };
+    SDL_RenderTexture(gui->sdl.renderer, gui->sdl.referenceLabel, NULL, &dst);
+    for (int i = 0; i < 6; i++) {
+      SDL_FRect dst = {
+          .x = reference_start_x + start_x,
+          .y = reference_start_y + 64.f * i,
+          .w = i == 5 ? 64.f : 320.f,
+          .h = 64.f,
+      };
+      SDL_FRect src = {
+          .x = i * 320.f,
+          .y = 0.f,
+          .w = i == 5 ? 64.f : 320.f,
+          .h = 64.f,
+      };
+      SDL_RenderTexture(gui->sdl.renderer, gui->sdl.charsTex, &src, &dst);
+    }
+    for (int i = 0; i < 26; i++) {
+      char ref = gui->game.reference[i];
+      if (!ref)
+        continue;
+      SDL_FRect dst = {
+          .x = reference_start_x + start_x + 64.f * (i % 5),
+          .y = reference_start_y + 64.f * (int)(i / 5),
+          .w = 64.f,
+          .h = 64.f,
+      };
+      if (ref == 1) {
+        // TODO: put crosses
+        // SDL_RenderTexture(gui->sdl.renderer, gui->sdl.cross, NULL, &dst);
+        SDL_SetRenderDrawColor(gui->sdl.renderer, 255, 0, 0, 100);
+        SDL_RenderFillRect(gui->sdl.renderer, &dst);
+      } else if (ref == 2) {
+        SDL_SetRenderDrawColor(gui->sdl.renderer, 0, 255, 0, 100);
+        SDL_RenderFillRect(gui->sdl.renderer, &dst);
+      }
+    }
   }
   SDL_RenderPresent(gui->sdl.renderer);
 }
