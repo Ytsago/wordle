@@ -111,7 +111,9 @@ Contributions are welcome! If you'd like to improve the game, add new features, 
 
 👥 Collaborators
 
-    Ytsago (Project Creator)
+    rdesprez
+
+    Ytsago
     
 
 Note: Based on the public GitHub repository, Ytsago is currently the sole listed contributor. If there are other collaborators, please add their names here!
