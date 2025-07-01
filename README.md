@@ -112,7 +112,7 @@ Contributions are welcome! If you'd like to improve the game, add new features, 
 👥 Collaborators
 
     rdesprez
-
+    PabloBellissant
     Ytsago
     
 
